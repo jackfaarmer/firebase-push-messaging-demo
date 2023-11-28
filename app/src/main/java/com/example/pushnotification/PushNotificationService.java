@@ -59,6 +59,6 @@ public class PushNotificationService extends FirebaseMessagingService {
         //Send notification through channel so that it gets displayed
         int notificationId = 1; // Unique identifier for the notification
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
-        notificationManager.notify(notificationId, notification.build());
+        //notificationManager.notify(notificationId, notification.build());
     }
 }
