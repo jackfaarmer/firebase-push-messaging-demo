@@ -1,64 +1,44 @@
 package com.example.pushnotification;
 
-import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
-import android.content.pm.PackageManager;
-import android.Manifest;
-
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.Intent;
+import androidx.core.app.NotificationCompat;
+import androidx.annotation.NonNull;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
-import androidx.annotation.NonNull;
-import androidx.core.app.ActivityCompat;
-import androidx.core.app.NotificationManagerCompat;
-import androidx.core.content.ContextCompat;
-
-// TODO ADD THIS CLASS
 public class PushNotificationService extends FirebaseMessagingService {
-
-    private static final int PERMISSION_REQUEST_CODE = 123;
-
-
     @Override
     public void onMessageReceived(@NonNull RemoteMessage remoteMessage) {
-        super.onMessageReceived(remoteMessage);
-
         //Get title and body of notification
         String title = remoteMessage.getNotification().getTitle();
         String text = remoteMessage.getNotification().getBody();
 
-        //Set up Notification Channel.  Takes 3 params
-        // IMPORTANCE_HIGH = Make a sound and appears as heads up notification
-        // IMPORTANCE_DEFAULT = Makes a sound
-        // IMPORTANCE_LOW = Makes no sound
-        // IMPORTANCE_MIN = Makes no sound and doesn't appear in status bar
-        // IMPORTANCE_NONE = Makes no sound and doesn't appear in status bar or shade
-        final String CHANNEL_ID = "HEADS_UP_NOTIFICATION";
-        NotificationChannel channel = new NotificationChannel(
-                CHANNEL_ID,
-                "Heads up notification",
-                NotificationManager.IMPORTANCE_HIGH
-        );
-        //Add channel to Android device
-        getSystemService(NotificationManager.class).createNotificationChannel(channel);
+        Intent intent = new Intent(this, MainActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0 /* Request code */, intent,
+                PendingIntent.FLAG_IMMUTABLE);
 
-        //Create notification
-        Notification.Builder notification = new Notification.Builder(this, CHANNEL_ID);
+        String channelId = "HEADS_UP_NOTIFICATION";
+        NotificationCompat.Builder notificationBuilder =
+                new NotificationCompat.Builder(this, channelId)
+                        .setContentTitle(title)
+                        .setContentText(text)
+                        .setAutoCancel(true)
+                        .setSmallIcon(R.drawable.firebase)
+                        .setContentIntent(pendingIntent);
 
-        //Set title and text
-        notification.setContentTitle(title);
-        notification.setContentText(text);
+        NotificationManager notificationManager =
+                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
-        //Provide small icon for notification
-        notification.setSmallIcon(R.drawable.firebase_small);
+        NotificationChannel channel = new NotificationChannel(channelId, "Heads Up Channel",
+                NotificationManager.IMPORTANCE_HIGH);
+        notificationManager.createNotificationChannel(channel);
 
-        //Make notification go away when we tap on it
-        notification.setAutoCancel(true);
+        notificationManager.notify(0 /* ID of notification */, notificationBuilder.build());
 
-        //Send notification through channel so that it gets displayed
-        int notificationId = 1; // Unique identifier for the notification
-        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
-        //notificationManager.notify(notificationId, notification.build());
     }
+
 }
